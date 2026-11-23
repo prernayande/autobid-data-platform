@@ -1,0 +1,18 @@
+# dbt project settings for AutoBid.
+# Connection details are NOT here: they are in ~/.dbt/profiles.yml (outside the repo).
+
+name: autobid
+version: "1.0.0"
+profile: autobid                 # which entry in profiles.yml to use
+
+model-paths: ["models"]
+test-paths: ["tests"]
+
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  autobid:
+    staging:
+      +materialized: view        # light: always shows the latest RAW data, stores nothing
+    marts:
+      +materialized: table       # stored result: fast for dashboards to read

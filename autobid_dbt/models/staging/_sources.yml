@@ -1,0 +1,49 @@
+version: 2
+
+# Sources = the raw tables dbt reads but does NOT build.
+# They are loaded by scripts/load_to_snowflake.py. Every column is text there;
+# the staging models cast them to real types.
+# Models refer to them as {{ source('raw', 'vehicles') }}, which gives dbt the lineage.
+
+sources:
+  - name: raw
+    description: Raw CSV data loaded as-is into Snowflake by scripts/load_to_snowflake.py.
+    database: AUTOBID
+    schema: RAW
+    meta:
+      owner: prerna
+
+    tables:
+      - name: vehicles
+        description: >
+          One row per car offered at auction: 1,000 real cars sampled from the Kaggle
+          "Car Features and MSRP" dataset, plus a generated vehicle_id and fake VIN.
+        columns:
+          - name: vehicle_id
+            description: Generated ID of the car. One row per car.
+          - name: vin
+            description: Fake 17-character Vehicle Identification Number.
+          - name: msrp
+            description: Manufacturer's suggested retail price when new, in US dollars.
+          - name: _loaded_at
+            description: When the load script copied this row into Snowflake.
+
+      - name: auction_sales
+        description: >
+          One row per auction listing (lot). SYNTHETIC data: real auction sales are not public.
+          An unsold car is relisted 14 days later, up to 3 tries.
+        columns:
+          - name: sale_id
+            description: ID of the listing. One row per listing.
+          - name: vehicle_id
+            description: The car being sold. Points to vehicles.vehicle_id.
+          - name: damage_type
+            description: Main damage on the car, e.g. Front End, Hail, Flood.
+          - name: title_type
+            description: Clean or Salvage title.
+          - name: sale_price
+            description: Winning bid in US dollars. Empty when the lot did not sell.
+          - name: is_sold
+            description: "'True' if the lot sold, 'False' if not (text in RAW)."
+          - name: _loaded_at
+            description: When the load script copied this row into Snowflake.
