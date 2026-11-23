@@ -1,0 +1,7 @@
+sale_id,vehicle_id,lot_number,damage_type,title_type,yard_state,sale_date,bid_count,sale_price,is_sold
+1401,1,76215748,Minor Dents/Scratches,Clean,IL,2025-05-17,17,9150,True
+1402,1,27289643,Minor Dents/Scratches,Clean,IL,2025-05-17,0,,False
+1403,1,44103198,Minor Dents/Scratches,Clean,IL,2025-05-17,17,-500,True
+1,1,35685863,Minor Dents/Scratches,Clean,IL,2025-05-17,17,9150,True
+1404,99999,84692313,Minor Dents/Scratches,Clean,IL,2025-05-17,17,9150,True
+1405,1,72153630,Fire,Clean,IL,2025-05-17,17,9150,True
