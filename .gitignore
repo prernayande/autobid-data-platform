@@ -221,3 +221,20 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ---- AutoBid project additions ----
+# Secrets: Snowflake private keys and dbt connection profile (must never be committed)
+*.p8
+*.pem
+profiles.yml
+# dbt output folders
+logs/
+# My personal learning notes
+notes/
+# macOS folder metadata
+.DS_Store
+# Airflow: its own virtual environment, plus its local database, logs and config.
+# Only the DAG code in airflow/dags/ is committed.
+.venv-airflow/
+airflow/*
+!airflow/dags/

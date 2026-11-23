@@ -1,0 +1,10 @@
+# Python packages for the AutoBid data platform.
+# Exact versions so my laptop and GitHub Actions install the same thing.
+
+# dbt: transforms, tests and documents data in Snowflake.
+# dbt-core is pinned on purpose: without it, pip picks a beta (pre-release) version.
+dbt-core==1.12.7
+dbt-snowflake==1.12.5
+
+# Snowflake's Python driver: used by scripts/load_to_snowflake.py.
+snowflake-connector-python==5.2.0
