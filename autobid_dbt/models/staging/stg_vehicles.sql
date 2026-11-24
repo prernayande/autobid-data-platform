@@ -34,7 +34,7 @@ cleaned as (
         cast(city_mpg as integer)                   as city_mpg,
 
         -- price and popularity
-        cast(msrp as integer)                       as msrp,
+        cast(msrp as integer)                       as msrp_usd,  -- DEMO: rename without updating the mart
         cast(popularity as integer)                 as popularity,
 
         -- audit
