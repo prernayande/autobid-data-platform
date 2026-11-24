@@ -185,7 +185,7 @@ autobid-data-platform/
 - [x] 9. Commit + push
 
 ### Day 2 — CI, BigQuery, Airflow
-- [ ] 10. GitHub Actions CI + branch protection
+- [x] 10. GitHub Actions CI + branch protection
 - [ ] 11. BigQuery sandbox + load script
 - [ ] 12. Same dbt project running on BigQuery (`--target bq`)
 - [ ] 13. Airflow DAG running the daily pipeline
@@ -194,6 +194,6 @@ autobid-data-platform/
 - [ ] 14. DataHub running locally
 - [ ] 15. DataHub ingestion (Snowflake + dbt)
 - [ ] 16. Governance demo (change → PR → CI → lineage impact)
-- [ ] 17. README with architecture diagram + "how it would grow"
+- [x] 17. README with architecture diagram + "how it would grow"
 
 Update this checklist as steps are completed.
