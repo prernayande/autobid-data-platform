@@ -182,7 +182,7 @@ autobid-data-platform/
 - [x] 6. Staging models
 - [x] 7. Mart model
 - [x] 8. Tests + docs + bad-data demo
-- [ ] 9. Commit + push
+- [x] 9. Commit + push
 
 ### Day 2 — CI, BigQuery, Airflow
 - [ ] 10. GitHub Actions CI + branch protection
