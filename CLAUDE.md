@@ -191,8 +191,8 @@ autobid-data-platform/
 - [x] 13. Airflow DAG running the daily pipeline
 
 ### Day 3 — Governance + story
-- [ ] 14. DataHub running locally
-- [ ] 15. DataHub ingestion (Snowflake + dbt)
+- [x] 14. DataHub running locally
+- [x] 15. DataHub ingestion (Snowflake + dbt)
 - [ ] 16. Governance demo (change → PR → CI → lineage impact)
 - [x] 17. README with architecture diagram + "how it would grow"
 

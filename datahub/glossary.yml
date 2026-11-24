@@ -1,0 +1,19 @@
+# Business glossary: shared definitions of the metrics analysts use.
+# Run from the repo root:  datahub ingest -c datahub/glossary_recipe.yml
+version: "1"
+source: AutoBid
+owners:
+  users: [prerna]
+url: https://github.com/prernayande/autobid-data-platform
+terms:
+  - id: Value Retained          # same ID dbt uses for the column tag
+    name: Value Retained
+    description: >
+      Share of a car's original price (MSRP) recovered at auction: sale_price / msrp for each
+      sold car. Reported as the average across cars x 100, so each car counts equally.
+      Lives in mart_damage_value_retention.avg_value_retained_pct.
+  - id: Sell-through Rate
+    name: Sell-through Rate
+    description: >
+      Share of auction listings that ended in a sale: lots_sold / lots_listed x 100.
+      A relisted car counts once per listing. Lives in mart_damage_value_retention.sell_through_pct.

@@ -1,0 +1,29 @@
+# DataHub ingestion: dbt artifacts (models, sources, tests, descriptions, owners, lineage).
+# First run, in autobid_dbt/:  dbt build && dbt docs generate
+# Then, from the repo root:    datahub ingest -c datahub/dbt.yml
+source:
+  type: dbt
+  config:
+    manifest_path: autobid_dbt/target/manifest.json
+    catalog_path: autobid_dbt/target/catalog.json
+    run_results_paths: [autobid_dbt/target/run_results.json]
+    target_platform: snowflake
+    # dbt `meta: owner: prerna` -> DataHub owner
+    meta_mapping:
+      owner:
+        match: ".*"
+        operation: add_owner
+        config:
+          owner_type: user
+    # column `meta: glossary_term: Value Retained` -> DataHub glossary term on that column
+    column_meta_mapping:
+      glossary_term:
+        match: ".*"
+        operation: add_term
+        config:
+          term: "{{ $match }}"
+
+sink:
+  type: datahub-rest
+  config:
+    server: http://localhost:8080

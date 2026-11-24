@@ -165,6 +165,48 @@ export SNOWFLAKE_ACCOUNT=<account> SNOWFLAKE_USER=DBT_SVC SNOWFLAKE_PRIVATE_KEY_
 airflow standalone        # UI at http://localhost:8080; don't run it at the same time as DataHub
 ```
 
+## Governance in DataHub
+
+DataHub (open source, running locally in Docker) is the catalog: where each dataset comes from, who
+owns it, what it means. Recipes are in [datahub/](datahub/):
+
+| Recipe | What it loads |
+| --- | --- |
+| [dbt.yml](datahub/dbt.yml) | All dbt models and sources with descriptions, owners (`meta.owner` → DataHub owner), tests, and model-to-model lineage; column `meta.glossary_term` → glossary term on that column |
+| [glossary.yml](datahub/glossary.yml) | Business terms **Value Retained** and **Sell-through Rate**, with definitions |
+| [lineage.yml](datahub/lineage.yml) | The step no tool can see: CSV file → RAW table (done by the load script outside the warehouse) |
+| [snowflake.yml](datahub/snowflake.yml) | Snowflake-native metadata for `RAW` and `ANALYTICS`, as the least-privilege role |
+
+What DataHub shows for `mart_damage_value_retention`:
+
+- **Lineage, 6 levels:** `auction_sales.csv` → `RAW.AUCTION_SALES` → dbt source → `stg_auction_sales`
+  → mart (and the same chain for vehicles).
+- **Owner:** `prerna`. **Description** on the model and every column.
+- **Glossary:** `avg_value_retained_pct` → *Value Retained*, `sell_through_pct` → *Sell-through Rate*.
+
+```bash
+uv tool install --python 3.12 'acryl-datahub[snowflake,dbt]'   # CLI in its own environment
+datahub docker quickstart                                       # UI at http://localhost:9002
+cd autobid_dbt && dbt docs generate --target prod && cd ..      # manifest + catalog
+datahub ingest -c datahub/glossary_recipe.yml
+datahub ingest -c datahub/dbt.yml
+datahub ingest -c datahub/lineage_recipe.yml
+datahub docker quickstart --stop                                # free the laptop's memory
+```
+
+Notes from setting it up:
+
+- If a local MySQL already uses port 3306, DataHub's own MySQL can't start. This CLI version ignored
+  `--mysql-port`, so I copied the quickstart compose file, changed the host port to 3307 and started
+  it with `datahub docker quickstart -f <file>`.
+- With DataHub CLI 1.9.0 the Snowflake recipe hung on the laptop (Snowflake itself was idle):
+  first while parsing view SQL, then after excluding views. dbt already provides every dataset,
+  column, description and lineage edge, so the demo uses the dbt recipe; the Snowflake recipe is kept
+  for when it's fixed. Snowflake-side lineage would also need `ACCOUNT_USAGE` access, which the
+  project role deliberately doesn't have.
+- Glossary term IDs must match exactly: the glossary file sets `id: Value Retained` so it's the same
+  term dbt tags the column with (without it DataHub generated `Value-Retained`, a second, empty term).
+
 ## How to run it
 
 Prerequisites: Python 3.12, a Snowflake account. One-time setup:

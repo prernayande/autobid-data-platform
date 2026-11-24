@@ -1,0 +1,26 @@
+# File-level lineage: the CSV files that the load script copies into each RAW table.
+# (Snowflake and dbt can't see this step, because it happens outside the warehouse.)
+version: 1
+lineage:
+  - entity:
+      name: autobid.raw.vehicles
+      type: dataset
+      env: PROD
+      platform: snowflake
+    upstream:
+      - entity:
+          name: data/generated/vehicles.csv
+          type: dataset
+          env: PROD
+          platform: file
+  - entity:
+      name: autobid.raw.auction_sales
+      type: dataset
+      env: PROD
+      platform: snowflake
+    upstream:
+      - entity:
+          name: data/generated/auction_sales.csv
+          type: dataset
+          env: PROD
+          platform: file
