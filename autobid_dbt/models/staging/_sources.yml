@@ -10,8 +10,9 @@ sources:
     description: Raw CSV data loaded as-is into Snowflake by scripts/load_to_snowflake.py.
     database: AUTOBID
     schema: RAW
-    meta:
-      owner: prerna
+    config:
+      meta:
+        owner: prerna   # who to ask about this data
 
     tables:
       - name: vehicles

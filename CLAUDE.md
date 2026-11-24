@@ -179,7 +179,7 @@ autobid-data-platform/
 - [x] 3. Data generator
 - [x] 4. Load script (stage + COPY INTO)
 - [x] 5. dbt project + profile + sources
-- [ ] 6. Staging models
+- [x] 6. Staging models
 - [ ] 7. Mart model
 - [ ] 8. Tests + docs + bad-data demo
 - [ ] 9. Commit + push
