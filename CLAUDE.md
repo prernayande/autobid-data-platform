@@ -188,7 +188,7 @@ autobid-data-platform/
 - [x] 10. GitHub Actions CI + branch protection
 - [ ] 11. BigQuery sandbox + load script
 - [ ] 12. Same dbt project running on BigQuery (`--target bq`)
-- [ ] 13. Airflow DAG running the daily pipeline
+- [x] 13. Airflow DAG running the daily pipeline
 
 ### Day 3 — Governance + story
 - [ ] 14. DataHub running locally
