@@ -1,0 +1,58 @@
+# CI: on every pull request to main, build and test the whole dbt project in Snowflake.
+# A failing model or test makes this check fail, and branch protection then blocks the merge.
+#
+# Secrets (GitHub repo settings -> Secrets and variables -> Actions):
+#   SNOWFLAKE_ACCOUNT, SNOWFLAKE_USER, SNOWFLAKE_PRIVATE_KEY (contents of the .p8 file)
+# CI writes to its own schema, DBT_CI, so it never touches dev (DBT_PRERNA) or prod (ANALYTICS).
+
+name: dbt CI
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:            # also allow a manual run from the Actions tab
+
+jobs:
+  dbt-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dbt (same pinned versions as my laptop)
+        run: pip install -r requirements.txt
+
+      - name: Write dbt profile (values are read from secrets at run time)
+        run: |
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml <<'EOF'
+          autobid:
+            target: ci
+            outputs:
+              ci:
+                type: snowflake
+                account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+                user: "{{ env_var('SNOWFLAKE_USER') }}"
+                private_key: "{{ env_var('SNOWFLAKE_PRIVATE_KEY') }}"
+                role: AUTOBID_ROLE
+                warehouse: AUTOBID_WH
+                database: AUTOBID
+                schema: DBT_CI
+                threads: 4
+          EOF
+
+      - name: dbt build (models + tests)
+        working-directory: autobid_dbt
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+          SNOWFLAKE_PRIVATE_KEY: ${{ secrets.SNOWFLAKE_PRIVATE_KEY }}
+        run: dbt build --target ci
