@@ -1,0 +1,31 @@
+# DataHub ingestion: Snowflake metadata (databases, schemas, tables, views, columns).
+# Logs in as DBT_SVC with the least-privilege AUTOBID_ROLE. Values come from env vars.
+# Lineage/usage are OFF: they need ACCOUNT_USAGE access (admin-level). dbt provides lineage instead.
+# Views are OFF: DataHub parses every view's SQL and hung on ours; the staging views come in
+# through the dbt recipe instead (with their lineage). Only RAW + prod ANALYTICS, not dev/CI copies.
+# Run from the repo root:  datahub ingest -c datahub/snowflake.yml
+source:
+  type: snowflake
+  config:
+    account_id: ${SNOWFLAKE_ACCOUNT}
+    username: ${SNOWFLAKE_USER}
+    authentication_type: KEY_PAIR_AUTHENTICATOR
+    private_key_path: ${SNOWFLAKE_PRIVATE_KEY_FILE}   # full path, e.g. /Users/me/.snowflake/dbt_svc_key.p8
+    role: AUTOBID_ROLE
+    warehouse: AUTOBID_WH
+    database_pattern:
+      allow: ["^AUTOBID$"]
+    schema_pattern:
+      allow: ["^RAW$", "^ANALYTICS$"]
+    include_views: false
+    include_table_lineage: false
+    include_view_lineage: false
+    include_usage_stats: false
+    include_operational_stats: false
+    profiling:
+      enabled: false
+
+sink:
+  type: datahub-rest
+  config:
+    server: http://localhost:8080
