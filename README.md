@@ -40,6 +40,7 @@ flowchart LR
 | Data generation | Python (standard library only) | [scripts/generate_auction_data.py](scripts/generate_auction_data.py) |
 | Load | Python + Snowflake connector, `PUT` + `COPY INTO` | [scripts/load_to_snowflake.py](scripts/load_to_snowflake.py) |
 | Transform, test, document | dbt Core 1.12 (`dbt-snowflake`) | [autobid_dbt/](autobid_dbt/) |
+| Orchestration | Apache Airflow 3.3 (`airflow standalone`, own venv) | [airflow/dags/autobid_daily.py](airflow/dags/autobid_daily.py) |
 | CI/CD | GitHub Actions + branch protection on `main` | [.github/workflows/dbt_ci.yml](.github/workflows/dbt_ci.yml) |
 | Catalog, lineage, ownership | DataHub (open source, local Docker) | [datahub/](datahub/) |
 
@@ -138,6 +139,31 @@ pinned dbt version, writes a dbt profile from GitHub Secrets (`SNOWFLAKE_ACCOUNT
 `SNOWFLAKE_USER`, `SNOWFLAKE_PRIVATE_KEY`) and runs `dbt build --target ci` into schema `DBT_CI`.
 Branch protection on `main` requires a pull request and a passing `dbt-build` check, with no
 bypass for admins, so a change that breaks a model or a test can't be merged.
+
+## Daily orchestration (Airflow)
+
+[airflow/dags/autobid_daily.py](airflow/dags/autobid_daily.py) runs the pipeline once a day as three
+tasks in order: `generate_data` → `load_to_snowflake` → `dbt_build` (`dbt build --target prod`, into
+schema `ANALYTICS`). Each task calls the same script or command we run by hand, using the project's
+`.venv`. Settings: `catchup=False` (no backfilling of missed days), `max_active_runs=1` (two runs can't
+overwrite each other's data), one retry per task (every task is safe to re-run). A failing dbt test
+fails the run, so bad data never reaches `ANALYTICS`.
+
+First real run: all three tasks succeeded on the first try in 25 seconds, and dbt reported `PASS=20`
+on the prod target.
+
+Airflow lives in its own virtual environment (`.venv-airflow`, installed with Airflow's official
+constraints file) because its dependencies clash with dbt's. Only `airflow/dags/` is committed; the
+local database, logs and config are gitignored.
+
+```bash
+python3.12 -m venv .venv-airflow
+.venv-airflow/bin/pip install "apache-airflow==3.3.2" \
+  --constraint https://raw.githubusercontent.com/apache/airflow/constraints-3.3.2/constraints-3.12.txt
+export PATH=$PWD/.venv-airflow/bin:$PATH AIRFLOW_HOME=$PWD/airflow AIRFLOW__CORE__LOAD_EXAMPLES=False
+export SNOWFLAKE_ACCOUNT=<account> SNOWFLAKE_USER=DBT_SVC SNOWFLAKE_PRIVATE_KEY_FILE=$HOME/.snowflake/dbt_svc_key.p8
+airflow standalone        # UI at http://localhost:8080; don't run it at the same time as DataHub
+```
 
 ## How to run it
 
