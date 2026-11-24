@@ -194,6 +194,24 @@ datahub ingest -c datahub/lineage_recipe.yml
 datahub docker quickstart --stop                                # free the laptop's memory
 ```
 
+### Governance demo: a breaking change is caught before it ships
+
+1. **Impact, from DataHub lineage:** downstream of `stg_vehicles` is `mart_damage_value_retention`,
+   owner `prerna`, so renaming one of its columns affects the business mart and its owner.
+2. **The change:** [PR #5](https://github.com/prernayande/autobid-data-platform/pull/5) renames
+   `msrp` → `msrp_usd` in `stg_vehicles` without updating the mart.
+3. **CI catches it:**
+   ```
+   ERROR not_null_stg_vehicles_msrp   invalid identifier 'MSRP'
+   SKIP  relation DBT_CI.mart_damage_value_retention
+   Done. PASS=16 WARN=0 ERROR=1 SKIP=3 TOTAL=20
+   ```
+4. **Branch protection blocks it:** the PR's merge state is `BLOCKED`, for everyone including admins.
+   The PR was closed unmerged; `main` and the production mart were never touched.
+
+The safe way to make that change: rename in staging **and** update the mart, its YAML and the
+glossary mapping in the same PR, so CI passes and DataHub's lineage stays correct.
+
 Notes from setting it up:
 
 - If a local MySQL already uses port 3306, DataHub's own MySQL can't start. This CLI version ignored

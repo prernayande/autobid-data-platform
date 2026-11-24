@@ -193,7 +193,7 @@ autobid-data-platform/
 ### Day 3 — Governance + story
 - [x] 14. DataHub running locally
 - [x] 15. DataHub ingestion (Snowflake + dbt)
-- [ ] 16. Governance demo (change → PR → CI → lineage impact)
+- [x] 16. Governance demo (change → PR → CI → lineage impact)
 - [x] 17. README with architecture diagram + "how it would grow"
 
 Update this checklist as steps are completed.
