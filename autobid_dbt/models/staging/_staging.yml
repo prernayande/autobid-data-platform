@@ -1,0 +1,88 @@
+version: 2
+
+# Descriptions, owners and tests for the staging models.
+# Tests run on every `dbt build`; a failing test stops downstream models (the mart) from building.
+
+models:
+  - name: stg_vehicles
+    description: >
+      One row per car offered at auction, cleaned from RAW.VEHICLES: snake_case names,
+      real types, trimmed text, 'N/A' market category turned into NULL.
+    config:
+      meta:
+        owner: prerna
+    columns:
+      - name: vehicle_id
+        description: Unique ID of the car (primary key).
+        data_tests:
+          - unique
+          - not_null
+      - name: vin
+        description: Fake 17-character Vehicle Identification Number. Unique per car.
+        data_tests:
+          - unique
+          - not_null
+      - name: make
+        description: Car manufacturer, e.g. Toyota, BMW.
+      - name: model
+        description: Car model name, e.g. Camry.
+      - name: model_year
+        description: Model year of the car.
+      - name: msrp
+        description: Manufacturer's suggested retail price when new, in US dollars.
+        data_tests:
+          - not_null
+      - name: loaded_at
+        description: When the load script copied this row into Snowflake.
+
+  - name: stg_auction_sales
+    description: >
+      One row per auction listing (lot), cleaned from RAW.AUCTION_SALES. SYNTHETIC data.
+      Bad rows are NOT filtered out here, so the tests below can catch them.
+    config:
+      meta:
+        owner: prerna
+    columns:
+      - name: sale_id
+        description: Unique ID of the listing (primary key).
+        data_tests:
+          - unique
+          - not_null
+      - name: vehicle_id
+        description: The car being sold. Must exist in stg_vehicles.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_vehicles')
+                field: vehicle_id
+      - name: lot_number
+        description: Auction lot number shown to buyers.
+      - name: damage_type
+        description: Main damage on the car.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Front End', 'Rear End', 'Side', 'Hail', 'Flood', 'Mechanical', 'Minor Dents/Scratches']
+      - name: title_type
+        description: Clean or Salvage title.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Clean', 'Salvage']
+      - name: yard_state
+        description: US state of the yard holding the car.
+      - name: sale_date
+        description: Date of the auction.
+      - name: bid_count
+        description: Number of bids received.
+      - name: sale_price
+        description: Winning bid in US dollars. NULL when the lot did not sell. Must be > 0 when sold.
+      - name: is_sold
+        description: True if the lot sold.
+        data_tests:
+          - not_null
+      - name: loaded_at
+        description: When the load script copied this row into Snowflake.

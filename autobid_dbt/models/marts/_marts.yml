@@ -1,0 +1,31 @@
+version: 2
+
+models:
+  - name: mart_damage_value_retention
+    description: >
+      One row per damage type. Answers: how much value does a car keep after damage,
+      and which damage types sell best at auction? Built from stg_auction_sales joined
+      to stg_vehicles. Sale data is SYNTHETIC.
+    config:
+      meta:
+        owner: prerna
+    columns:
+      - name: damage_type
+        description: Main damage on the car. One row per damage type.
+        data_tests:
+          - unique
+          - not_null
+      - name: lots_listed
+        description: Number of listings, sold or not. A relisted car counts once per listing.
+      - name: lots_sold
+        description: Number of listings that ended in a sale.
+      - name: sell_through_pct
+        description: lots_sold / lots_listed x 100.
+      - name: avg_sale_price
+        description: Average winning bid in US dollars, sold lots only.
+      - name: avg_msrp
+        description: Average MSRP of the sold lots, so it is comparable with avg_sale_price.
+      - name: avg_value_retained_pct
+        description: >
+          Value Retained: for each sold car, sale_price / msrp; then the average of those x 100.
+          Each car counts equally, whatever its price.

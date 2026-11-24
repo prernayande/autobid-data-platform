@@ -180,8 +180,8 @@ autobid-data-platform/
 - [x] 4. Load script (stage + COPY INTO)
 - [x] 5. dbt project + profile + sources
 - [x] 6. Staging models
-- [ ] 7. Mart model
-- [ ] 8. Tests + docs + bad-data demo
+- [x] 7. Mart model
+- [x] 8. Tests + docs + bad-data demo
 - [ ] 9. Commit + push
 
 ### Day 2 — CI, BigQuery, Airflow
